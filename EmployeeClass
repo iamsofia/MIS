@@ -1,0 +1,78 @@
+'Description: Employee class
+Option Strict On
+Public Class EmployeeClass
+    'Add objects to allow project to connect to database
+    Dim daEmployees As New FinalProjectDatabaseOlderDataSetTableAdapters.tblEmployeesTableAdapter
+    Dim dsEmployees As New FinalProjectDatabaseOlderDataSet.tblEmployeesDataTable
+
+    'Structure to contain login information
+    Public Structure sLogin
+        Dim EmpID As Integer
+        Dim Password As String
+    End Structure
+
+    ' create a module-level array of login structure
+    Private LoginInfo() As sLogin
+
+    ' define public property for users to get arry of employees for login logic
+    ReadOnly Property LoginData() As sLogin()
+        Get
+            Return LoginInfo
+        End Get
+    End Property
+
+    'public sub to populate LoginInfo array from the database
+    Public Sub GetLoginInfo()
+
+        'Purpose: get login information from dataset
+        'Arguments: none
+        'Returns: none
+        'Authors: Rick Byars
+        'Date: 5/3/2014
+
+        'declare a variable to hold employee count
+        Dim intEmployeeCount As Integer
+
+        ' get employee data and fill data set
+        Me.dsEmployees = Me.daEmployees.GetData
+
+        ' get record count
+        intEmployeeCount = Me.dsEmployees.Count
+
+
+        ' loop through and fill array
+        For i = 0 To intEmployeeCount - 1
+            ' get each employee's ID and passwor and put it into the LoginArray above
+            ReDim Preserve LoginInfo(i)
+            LoginInfo(i).EmpID = CInt(Me.dsEmployees.Rows(i).Item("EmpID"))
+            LoginInfo(i).Password = Me.dsEmployees.Rows(i).Item("Password").ToString
+        Next
+    End Sub
+
+    Public Function CheckLogin(intEmpID As Integer, strPassword As String) As Boolean
+
+        'Purpose: Check employee login information to see if it matches
+        'Arguments: Employee ID and Password
+        'Returns: True if match, false if mismatch
+        'Authors: Rick Byars
+        'Date: 5/3/2014
+
+
+        GetLoginInfo()
+
+        Dim i As Integer
+
+        For i = 0 To LoginInfo.Length - 1
+
+            If LoginInfo(i).EmpID = intEmpID And LoginInfo(i).Password = strPassword Then
+                Return True
+            End If
+
+        Next
+
+        'if you get here, no matches were found in the list of employees
+        Return False
+
+    End Function
+
+End Class
